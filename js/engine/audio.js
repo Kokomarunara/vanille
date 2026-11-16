@@ -8,17 +8,55 @@ let muted = false;
 try { muted = localStorage.getItem(SON) === 'non'; } catch (_) {}
 
 export function unlock() {
-  if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return;
   // Sur iPhone, sans ça, le son est coupé quand le bouton « silencieux » est activé
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
-  ac = new AC();
-  master = ac.createGain(); master.gain.value = muted ? 0 : 1; master.connect(ac.destination);
-  musicBus = ac.createGain(); musicBus.connect(master);
-  if (ac.state === 'suspended') ac.resume(); // certains navigateurs créent le contexte en pause
+  if (!ac) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ac = new AC();
+    master = ac.createGain(); master.gain.value = muted ? 0 : 1; master.connect(ac.destination);
+    musicBus = ac.createGain(); musicBus.connect(master);
+  }
+  silentPlayer();
+  // « suspended » (pas encore autorisé) ou « interrupted » (appel, autre appli sur iPhone) : on relance
+  if (ac.state !== 'running') {
+    try { ac.resume(); } catch (_) {}
+    // Astuce iOS : jouer un son vide pendant le geste débloque définitivement l'audio
+    try { const s = ac.createBufferSource(); s.buffer = ac.createBuffer(1, 1, 22050); s.connect(ac.destination); s.start(0); } catch (_) {}
+  }
+}
+
+// Safari sur iPhone n'autorise le son que pendant un vrai geste : doigt relâché (touchend), clic ou touche.
+// Le simple fait de poser le doigt (pointerdown) ne suffit pas. On réessaie donc à chaque geste tant que le son
+// n'est pas actif, et on reste à l'écoute : iOS peut couper l'audio après un appel ou un passage dans une autre appli.
+export function installUnlock(onReady) {
+  const tryUnlock = () => {
+    if (ac && ac.state === 'running') return;
+    unlock();
+    if (onReady) setTimeout(() => { if (ac && ac.state === 'running') onReady(); }, 60);
+  };
+  for (const ev of ['touchend', 'pointerup', 'click', 'keydown']) window.addEventListener(ev, tryUnlock, { capture: true, passive: true });
 }
 export const audioState = () => (ac ? ac.state : 'none');
+
+// Avant iOS 17, le bouton « silencieux » de l'iPhone coupe le son des jeux web. Astuce connue : faire jouer
+// un vrai lecteur <audio> (ici du silence, en boucle) bascule l'iPhone en mode « lecture », et le son du jeu passe.
+let silent = null;
+function silentPlayer() {
+  if (navigator.audioSession || silent) return; // iOS 17+ : déjà réglé par audioSession
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) return; // inutile ailleurs
+  try {
+    const n = 4410, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf); // 0,1 s de silence en WAV
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true); v.setUint32(24, 44100, true); v.setUint32(28, 88200, true); v.setUint16(32, 2, true);
+    v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+    silent = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
+    silent.loop = true; silent.setAttribute('playsinline', '');
+    const p = silent.play(); if (p && p.catch) p.catch(() => { silent = null; }); // refusé : on réessaiera au prochain geste
+  } catch (_) { silent = null; }
+}
 export const isMuted = () => muted;
 export function setMuted(v) {
   muted = v;

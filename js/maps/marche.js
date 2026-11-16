@@ -12,10 +12,8 @@ export default {
     ...Array(11).fill('c'.repeat(W)),
     'g'.repeat(W), 'g'.repeat(W),
   ],
-  warps: [
-    { x: 0, y: 6, to: 'rue', tx: 20, ty: 5, dir: 'left' },
-    { x: 0, y: 7, to: 'rue', tx: 20, ty: 6, dir: 'left' },
-  ],
+  // Tout le bord gauche de la place (lignes 5 à 15) ramène dans la rue, à la même hauteur (la rue s'arrête à la ligne 13)
+  warps: Array.from({ length: 11 }, (_, i) => ({ x: 0, y: 5 + i, to: 'rue', tx: 20, ty: Math.min(13, 5 + i), dir: 'left' })),
   objects: [
     // --- façades ---
     { t: 'sign', x: 2, y: 2, w: 4, label: 'ÉPICERIE', text: ['« Épicerie du monde — produits d\'ici et d\'ailleurs ».'] },
@@ -37,7 +35,7 @@ export default {
     // --- centre de la place ---
     { t: 'fountain', x: 11, y: 11, w: 3, h: 3, text: ['La fontaine de la place.', 'k: Une petite pompe de relevage, quelques watts à peine. Joli travail.'] },
     { t: 'bench', x: 8, y: 15, w: 2, text: ['Un banc, face à la fontaine.'] },
-    { t: 'bush', x: 1, y: 15, v: 'pink', text: ['Des hortensias roses.'] },
+    { t: 'bush', x: 5, y: 15, v: 'pink', text: ['Des hortensias roses.'] },
     { t: 'bush', x: 24, y: 6, text: ['Des hortensias. On est bien en Bretagne.'] },
     // rangée d'arbres qui ferme le bas de la place
     ...Array.from({ length: 13 }, (_, i) => ({ t: 'tree', x: i * 2, y: 16, w: 2, h: 2, text: ['Les arbres de la place.'] })),

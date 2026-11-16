@@ -27,6 +27,9 @@ top.imageSmoothingEnabled = pad.imageSmoothingEnabled = false;
 [rdc, etage, rue, marche, epicerie, lycee, poste, parc].forEach(world.register);
 input.init($('top'), $('pad'));
 input.onFirstInput(() => { audio.unlock(); if (mode === 'title') audio.music.play('title'); });
+// Sur iPhone, le son ne s'active qu'au doigt relâché : on réessaie à chaque geste tant qu'il n'est pas actif.
+// (La musique demandée entre-temps démarre d'elle-même dès que le son est autorisé.)
+audio.installUnlock();
 if (document.fonts && document.fonts.load) document.fonts.load('16px VT323');
 
 // ---------- Mise à l'échelle : deux écrans empilés (portrait) ou côte à côte (paysage) ----------

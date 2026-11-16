@@ -77,6 +77,14 @@ export function load(id, x, y, dir) {
   if (old) W.p.carry = old.carry;
   W.npcs = []; W.parts = [];
   refresh();
+  // Si la case d'arrivée est occupée (buisson, arbre, meuble...), on pose Ketura sur la case libre la plus proche
+  if (blocked(x, y)) {
+    let best = null;
+    for (let d = 1; d <= 6 && !best; d++)
+      for (let dy = -d; dy <= d && !best; dy++) for (let dx = -d; dx <= d && !best; dx++)
+        if (Math.max(Math.abs(dx), Math.abs(dy)) === d && !blocked(x + dx, y + dy)) best = [x + dx, y + dy];
+    if (best) { W.p.x = best[0]; W.p.y = best[1]; W.p.px = best[0] * 16; W.p.py = best[1] * 16; }
+  }
   camera();
   banner(m.name);
   document.getElementById('infoLoc').innerHTML = `<span>${m.name}</span>`;

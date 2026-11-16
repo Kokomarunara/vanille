@@ -12,10 +12,8 @@ export default {
     row('v'), row('v'), row('v'),
     'g'.repeat(20),
   ],
-  warps: [
-    { x: 19, y: 7, to: 'rue', tx: 1, ty: 5, dir: 'right' },
-    { x: 19, y: 8, to: 'rue', tx: 1, ty: 6, dir: 'right' },
-  ],
+  // Tout le bord droit (sauf derrière les arbres) ramène dans la rue, à une hauteur équivalente
+  warps: [0, 1, 4, 5, 6, 7, 8, 9, 12].map(y => ({ x: 19, y, to: 'rue', tx: 1, ty: Math.max(5, Math.min(13, y)), dir: 'right' })),
   objects: [
     { t: 'fence', x: 1, y: 1, w: 17, text: ['Un grillage. « Danger de mort — Défense d\'entrer ».'] },
     { t: 'fence', x: 1, y: 11, w: 17, text: ['Un grillage.'] },
