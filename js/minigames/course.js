@@ -29,7 +29,6 @@ export function course(g) {
       if ((input.take('a') || input.take('up')) && h === 0) { vy = 205; g.sfx.move(); }
       if (h > 0 || vy > 0) { h += vy * dt; vy -= 570 * dt; if (h <= 0) { h = 0; vy = 0; } }
       for (const o of obs) {
-        if (o.type === 'goeland') o.off += 45 * dt;
         const ox = o.x - o.off, w = o.type === 'flaque' ? 22 : o.type === 'branche' ? 14 : 18;
         if (o.hit || ox > dist + 24 || ox + w < dist + 8) continue;
         const touch = o.type === 'flaque' ? h < 5 : o.type === 'branche' ? h < 9 : h > 13;
@@ -59,7 +58,7 @@ export function course(g) {
       for (let i = 0; i < 8; i++) { const gx = ((i * 71 - dist * 1.25) % 320 + 320) % 320 - 30; r(c, Math.round(gx), 174 + (i * 7) % 12, 2, 5, '#3f7448'); r(c, Math.round(gx) + 3, 176 + (i * 7) % 12, 2, 4, '#254a30'); }
       // obstacles
       for (const o of obs) {
-        const x = Math.round(PX + (o.x - o.off - dist));
+        const x = Math.round(PX + (o.x - dist) * (o.type === 'goeland' ? 1.36 : 1)); // le goéland vole vers Ketura
         if (x < -40 || x > 280) continue;
         if (o.type === 'flaque') { r(c, x - 2, GROUND + 6, 26, 5, '#3a5090'); r(c, x, GROUND + 5, 22, 7, '#4a64a8'); r(c, x + 4, GROUND + 7, 8, 1, '#8aa4d8'); if (o.hit) for (let i = 0; i < 4; i++) r(c, x + i * 6, GROUND - 2 - (i % 2) * 5, 2, 3, '#8aa4d8'); }
         else if (o.type === 'branche') { r(c, x - 2, GROUND + 1, 18, 9, OL); r(c, x - 1, GROUND + 2, 16, 7, '#6b4a2e'); r(c, x - 1, GROUND + 2, 16, 2, '#8a6642'); r(c, x + 4, GROUND - 5, 3, 7, '#6b4a2e'); r(c, x + 5, GROUND - 8, 5, 4, '#3f7448'); r(c, x + 11, GROUND - 2, 2, 4, '#6b4a2e'); }

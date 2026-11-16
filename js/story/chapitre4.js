@@ -50,7 +50,8 @@ async function bed() {
   const p = W.p, a = g.npc('antoine');
   p.lie = a.lie = true; p.top = a.top = true;
   W.musicOverride = 'final'; // le thème tendre
-  p.px = 50; a.px = 78;
+  // le lit occupe la case : load() a pu poser Ketura à côté, on la remet sur le lit, à la même hauteur qu'Antoine
+  p.x = 3; p.y = a.y; p.mv = null; p.px = 50; p.py = a.py; a.px = 78;
   await g.fadeTo(0, .7);
   await g.lines([
     'Ils s\'allongent côte à côte et regardent le plafond.',
