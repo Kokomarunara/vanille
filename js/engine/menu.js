@@ -38,7 +38,7 @@ function render() {
   } else {
     titleEl.innerHTML = '<span>CHAPITRES</span>';
     const list = actions.chapters();
-    body.innerHTML = '<div class="list opts">' + list.map((c, i) => row(i, chSel, `<span>${c.n}. ${c.title}</span>`)).join('') + '</div>';
+    body.innerHTML = '<div class="list opts">' + (list.length ? list.map((c, i) => row(i, chSel, `<span>${c.n}. ${c.title}</span>`)).join('') : '<div class="row item"><span>Aucun chapitre terminé pour l\'instant.</span></div>') + '</div>';
     hint.innerHTML = '<span>A : rejouer   B : retour</span>';
   }
 }

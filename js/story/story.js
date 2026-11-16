@@ -66,6 +66,12 @@ export function unlocked() {
   if (sv && sv.chapter > m) m = sv.chapter; // anciennes sauvegardes
   return Math.min(LAST, m);
 }
+// Chapitres terminés (ceux qu'on peut rejouer) : tous ceux avant le plus loin atteint, et le dernier une fois le jeu fini
+export function finished() {
+  let m = 1;
+  try { m = (JSON.parse(localStorage.getItem(PKEY)) || {}).max || 1; } catch (_) {}
+  return Math.min(LAST, m - 1);
+}
 function unlock(n) {
   try { if (n > ((JSON.parse(localStorage.getItem(PKEY)) || {}).max || 1)) localStorage.setItem(PKEY, JSON.stringify({ max: n })); } catch (_) {}
 }
@@ -134,7 +140,7 @@ export function stop() { W.musicHold = false; cur = null; resetWorld(); W.map = 
 // Fin du jeu : retour à l'écran-titre (branché par main.js)
 let endFn = null;
 export function onEnd(fn) { endFn = fn; }
-const endGame = () => { if (endFn) endFn(); };
+const endGame = () => { unlock(LAST + 1); if (endFn) endFn(); }; // le jeu est fini : tous les chapitres deviennent rejouables
 
 Object.assign(api, { fadeMusic, card, playMini, S, addItem, removeItem, hasItem, startChapter, endGame });
 

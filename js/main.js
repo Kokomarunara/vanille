@@ -111,18 +111,21 @@ async function start() {
   // ?test&ch=2 pour sauter à un chapitre : seulement en mode test, pour que Ketura ne puisse pas tricher
   const q = new URLSearchParams(location.search), forced = q.has('test') ? +q.get('ch') : 0;
   let ch = forced || 1, resume = null;
-  const sv = story.loadSave(), max = story.unlocked();
-  if (!forced && sv && (sv.snap || sv.chapter > 1 || max > 1)) {
-    const opts = [sv.chapter > story.LAST ? 'Continuer' : `Continuer (chapitre ${sv.chapter})`, 'Nouvelle partie'];
-    if (max > 1) opts.push('Choisir un chapitre');
-    const k = await dlg.choose(opts);
-    if (k === 0) { ch = sv.chapter; resume = sv.snap ? sv : null; }
-    else if (k === 2) {
-      const list = chapterList();
-      const j = await dlg.choose([...list.map(c => `${c.n}. ${c.title}`), 'Retour']);
-      if (j === list.length) { mode = 'title'; return; }
-      ch = list[j].n;
-    } else ch = 1;
+  const sv = story.loadSave(), done = chapterList();
+  if (!forced) {
+    // Menu de démarrage : « Nouvelle partie » seule la première fois, puis « Continuer », et les chapitres déjà terminés
+    const CONT = sv ? `Continuer (chapitre ${Math.min(sv.chapter, story.LAST)})` : null, NEW = 'Nouvelle partie', PICK = 'Choisir un chapitre';
+    const opts = [CONT, NEW, done.length ? PICK : null].filter(Boolean);
+    const pick = opts[await dlg.choose(opts)];
+    if (pick === CONT) { ch = sv.chapter; resume = sv.snap ? sv : null; }
+    else if (pick === PICK) {
+      const j = await dlg.choose([...done.map(c => `${c.n}. ${c.title}`), 'Retour']);
+      if (j === done.length) { mode = 'title'; return; }
+      ch = done[j].n;
+    } else if (sv) { // on ne remplace pas une partie en cours sans demander
+      await dlg.say(null, 'Commencer une nouvelle partie ? La partie en cours sera remplacée.');
+      if (await dlg.choose(['Oui, recommencer', 'Non']) === 1) { mode = 'title'; return; }
+    }
   }
   $('title').classList.remove('on');
   world.W.fade = 1;
@@ -130,10 +133,10 @@ async function start() {
   if (resume) story.resumeGame(resume); else story.startChapter(ch);
 }
 
-// Chapitres qu'on peut rejouer : tous ceux déjà atteints
+// Chapitres qu'on peut rejouer : seulement ceux déjà terminés
 function chapterList() {
   const out = [];
-  for (let n = 1; n <= story.unlocked(); n++) out.push({ n, title: story.TITLES[n] });
+  for (let n = 1; n <= story.finished(); n++) out.push({ n, title: story.TITLES[n] });
   return out;
 }
 
