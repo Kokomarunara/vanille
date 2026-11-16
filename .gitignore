@@ -1,0 +1,5 @@
+# Fichiers privés ou de travail : jamais publiés
+Ref/
+.claude/
+escaliers.html
+serve.py

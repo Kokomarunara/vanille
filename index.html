@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1b1b22">
+<title>Ketoo — Version Vanille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="ds">
+  <div class="screen" id="top">
+    <canvas id="screen" width="256" height="192"></canvas>
+    <div id="banner"></div>
+    <div id="title">
+      <div class="t1">Ketoo</div>
+      <div class="t2">Version Vanille</div>
+      <div class="t3">Appuie sur A</div>
+    </div>
+    <div id="credits">
+      <div id="crFrame"><img id="crImg" alt=""><div id="crCap"></div></div>
+      <div id="crMsg"></div>
+    </div>
+    <div id="card"></div>
+    <div id="menu"><div class="mt" id="menuTitle"><span>MENU</span></div><div id="menuBody"></div><div class="hint"><span>B : fermer</span></div></div>
+    <div id="choices"></div>
+    <div id="dlg">
+      <div id="dlgName"></div>
+      <div id="dlgText"><span id="dlgShown"></span><span id="dlgHidden"></span></div>
+      <div id="dlgArrow">▼</div>
+    </div>
+  </div>
+  <div class="screen" id="bot">
+    <canvas id="pad" width="256" height="192"></canvas>
+    <div id="info">
+      <div id="infoLoc"></div>
+      <div id="infoObj"></div>
+    </div>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
